@@ -123,7 +123,7 @@ class _AppState extends State<App> {
                                   ),
                                   icon: CircleAvatar(
                                     radius: 40,
-                                    backgroundColor: Colors.green,
+                                    backgroundColor: Colors.blue,
                                     child: Icon(
                                       Icons.edit,
                                       size: 40,
@@ -281,7 +281,7 @@ class _AppState extends State<App> {
                                     ),
                                     ElevatedButton(
                                       style: ElevatedButton.styleFrom(
-                                        backgroundColor: Colors.green[100],
+                                        backgroundColor: Colors.blue[100],
                                         foregroundColor: Colors.white,
                                         shape: RoundedRectangleBorder(
                                           borderRadius: BorderRadius.circular(
@@ -320,7 +320,7 @@ class _AppState extends State<App> {
                                       child: Text(
                                         "Save",
                                         style: TextStyle(
-                                          color: Colors.green,
+                                          color: Colors.blue,
                                           fontWeight: FontWeight.bold,
                                         ),
                                       ),
