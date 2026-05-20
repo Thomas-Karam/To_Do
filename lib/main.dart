@@ -33,6 +33,11 @@ class _AppState extends State<App> {
   final time = TextEditingController();
   final date = TextEditingController();
 
+  final titleEdit = TextEditingController();
+  final descriptionEdit = TextEditingController();
+  final timeEdit = TextEditingController();
+  final dateEdit = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -84,7 +89,15 @@ class _AppState extends State<App> {
                     ),
                     title: Text(
                       snapshot.data![index].title ?? '',
-                      style: TextStyle(fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: snapshot.data![index].isCompleted
+                            ? Colors.grey
+                            : Colors.black,
+                        decoration: snapshot.data![index].isCompleted
+                            ? TextDecoration.lineThrough
+                            : TextDecoration.none,
+                      ),
                     ),
                     subtitle: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -93,16 +106,244 @@ class _AppState extends State<App> {
                         Text(snapshot.data![index].date ?? ''),
                       ],
                     ),
-                    trailing: CircleAvatar(
-                      backgroundColor: Colors.grey[200],
-                      child: IconButton(
-                        onPressed: () {
-                          setState(() {
-                            DBHelper().delete(snapshot.data![index].id!);
-                          });
-                        },
-                        icon: Icon(Icons.delete, color: Colors.red),
-                      ),
+                    trailing: Row(
+                      spacing: 4,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        CircleAvatar(
+                          backgroundColor: Colors.grey[200],
+                          child: IconButton(
+                            onPressed: () {
+                              showDialog(
+                                context: context,
+                                builder: (BuildContext context) => AlertDialog(
+                                  backgroundColor: Colors.white,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  icon: CircleAvatar(
+                                    radius: 40,
+                                    backgroundColor: Colors.green,
+                                    child: Icon(
+                                      Icons.edit,
+                                      size: 40,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                  title: Text(
+                                    "Edit Task",
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  content: ListView(
+                                    shrinkWrap: true,
+                                    padding: EdgeInsets.all(0),
+                                    children: [
+                                      TextField(
+                                        controller: titleEdit
+                                          ..text = snapshot.data![index].title!,
+                                        keyboardType: TextInputType.text,
+                                        textInputAction: TextInputAction.next,
+                                        decoration: InputDecoration(
+                                          hintText: "Title",
+                                          prefixIcon: Icon(Icons.title),
+                                          border: OutlineInputBorder(
+                                            borderRadius: BorderRadius.circular(
+                                              8,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                      SizedBox(height: 8),
+                                      TextField(
+                                        controller: descriptionEdit
+                                          ..text = snapshot
+                                              .data![index]
+                                              .description!,
+                                        keyboardType: TextInputType.text,
+                                        textInputAction: TextInputAction.next,
+                                        decoration: InputDecoration(
+                                          hintText: "Description",
+                                          prefixIcon: Icon(Icons.description),
+                                          border: OutlineInputBorder(
+                                            borderRadius: BorderRadius.circular(
+                                              8,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                      SizedBox(height: 8),
+                                      Row(
+                                        spacing: 4,
+                                        children: [
+                                          Expanded(
+                                            child: TextField(
+                                              controller: dateEdit
+                                                ..text = snapshot
+                                                    .data![index]
+                                                    .date!
+                                                    .split(" - ")
+                                                    .first,
+                                              keyboardType: TextInputType.none,
+                                              textInputAction:
+                                                  TextInputAction.next,
+                                              onTap: () async {
+                                                DateTime? pickedDate =
+                                                    await showDatePicker(
+                                                      context: context,
+                                                      initialDate:
+                                                          DateTime.now(),
+                                                      firstDate: DateTime(2000),
+                                                      lastDate: DateTime(2101),
+                                                    );
+                                                if (pickedDate != null) {
+                                                  setState(() {
+                                                    dateEdit.text =
+                                                        "${pickedDate.day}/${pickedDate.month}/${pickedDate.year}";
+                                                  });
+                                                }
+                                              },
+                                              decoration: InputDecoration(
+                                                hintText: "Date",
+                                                prefixIcon: Icon(
+                                                  Icons.calendar_today,
+                                                ),
+                                                border: OutlineInputBorder(
+                                                  borderRadius:
+                                                      BorderRadius.circular(8),
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                          Expanded(
+                                            child: TextField(
+                                              controller: timeEdit
+                                                ..text = snapshot
+                                                    .data![index]
+                                                    .date!
+                                                    .split(" - ")
+                                                    .last,
+                                              keyboardType: TextInputType.none,
+                                              textInputAction:
+                                                  TextInputAction.done,
+                                              onTap: () async {
+                                                TimeOfDay? pickedTime =
+                                                    await showTimePicker(
+                                                      context: context,
+                                                      initialTime:
+                                                          TimeOfDay.now(),
+                                                    );
+                                                if (pickedTime != null) {
+                                                  setState(() {
+                                                    timeEdit.text = pickedTime
+                                                        .format(context);
+                                                  });
+                                                }
+                                              },
+                                              decoration: InputDecoration(
+                                                hintText: "Time",
+                                                prefixIcon: Icon(
+                                                  Icons.access_time,
+                                                ),
+                                                border: OutlineInputBorder(
+                                                  borderRadius:
+                                                      BorderRadius.circular(8),
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                  actions: [
+                                    ElevatedButton(
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: Colors.red[100],
+                                        foregroundColor: Colors.white,
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(
+                                            8,
+                                          ),
+                                        ),
+                                      ),
+                                      onPressed: () {
+                                        Navigator.pop(context);
+                                      },
+                                      child: Text(
+                                        "Cancel",
+                                        style: TextStyle(
+                                          color: Colors.red,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+                                    ElevatedButton(
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: Colors.green[100],
+                                        foregroundColor: Colors.white,
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(
+                                            8,
+                                          ),
+                                        ),
+                                      ),
+                                      onPressed: () {
+                                        if (titleEdit.text.isNotEmpty &&
+                                            descriptionEdit.text.isNotEmpty &&
+                                            dateEdit.text.isNotEmpty &&
+                                            timeEdit.text.isNotEmpty) {
+                                          Navigator.pop(context);
+                                          setState(() {
+                                            DBHelper().update(
+                                              Task(
+                                                id: snapshot.data![index].id,
+                                                title: titleEdit.text,
+                                                description:
+                                                    descriptionEdit.text,
+                                                date:
+                                                    "${dateEdit.text} - ${timeEdit.text}",
+                                                isCompleted: snapshot
+                                                    .data![index]
+                                                    .isCompleted,
+                                              ),
+                                              snapshot.data![index].id!,
+                                            );
+                                          });
+                                          titleEdit.clear();
+                                          descriptionEdit.clear();
+                                          dateEdit.clear();
+                                          timeEdit.clear();
+                                        }
+                                      },
+                                      child: Text(
+                                        "Save",
+                                        style: TextStyle(
+                                          color: Colors.green,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            },
+                            icon: Icon(Icons.edit, color: Colors.blue),
+                          ),
+                        ),
+                        CircleAvatar(
+                          backgroundColor: Colors.grey[200],
+                          child: IconButton(
+                            onPressed: () {
+                              setState(() {
+                                DBHelper().delete(snapshot.data![index].id!);
+                              });
+                            },
+                            icon: Icon(Icons.delete, color: Colors.red),
+                          ),
+                        ),
+                      ],
                     ),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),
@@ -150,6 +391,7 @@ class _AppState extends State<App> {
                     textInputAction: TextInputAction.next,
                     decoration: InputDecoration(
                       hintText: "Title",
+                      prefixIcon: Icon(Icons.title),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
@@ -162,6 +404,7 @@ class _AppState extends State<App> {
                     textInputAction: TextInputAction.next,
                     decoration: InputDecoration(
                       hintText: "Description",
+                      prefixIcon: Icon(Icons.description),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
@@ -169,7 +412,7 @@ class _AppState extends State<App> {
                   ),
                   SizedBox(height: 8),
                   Row(
-                    spacing: 8,
+                    spacing: 4,
                     children: [
                       Expanded(
                         child: TextField(
@@ -192,6 +435,7 @@ class _AppState extends State<App> {
                           },
                           decoration: InputDecoration(
                             hintText: "Date",
+                            prefixIcon: Icon(Icons.calendar_today),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(8),
                             ),
@@ -216,6 +460,7 @@ class _AppState extends State<App> {
                           },
                           decoration: InputDecoration(
                             hintText: "Time",
+                            prefixIcon: Icon(Icons.access_time),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(8),
                             ),
